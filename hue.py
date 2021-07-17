@@ -7,12 +7,15 @@ import argparse
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 CREDENTIALS_PATH = os.path.join(SCRIPT_DIR, "credentials.json")
 
+PHILIPS_HUE_BRIDGE_IP = "10.0.0.79"
+ROOM_NAME = "Office"
+
 
 def main():
 
     args = parse_arguments()
 
-    bridge = Bridge(ip="192.168.1.2", config_file_path=CREDENTIALS_PATH)
+    bridge = Bridge(ip=PHILIPS_HUE_BRIDGE_IP, config_file_path=CREDENTIALS_PATH)
 
     api = bridge.get_api()
 
@@ -36,7 +39,7 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def list_scenes(bridge: Bridge, api: dict) -> None:
-    scenes: set = set()
+    scenes = set()
     for scene_dict in api["scenes"].values():
         scenes.add(scene_dict["name"])
 
@@ -49,11 +52,11 @@ def list_scenes(bridge: Bridge, api: dict) -> None:
 
 
 def activate_scene(bridge: Bridge, api: dict, scene: str) -> None:
-    basement_id = get_group_id(api=api, room_name="Basement")
+    group_id = get_group_id(api=api, room_name=ROOM_NAME)
 
-    scene_id = get_scene_id(api=api, scene_name=scene)
+    scene_id = get_scene_id(api=api, group_id=group_id, scene_name=scene)
 
-    bridge.activate_scene(group_id=basement_id, scene_id=scene_id, transition_time=1)
+    bridge.activate_scene(group_id=group_id, scene_id=scene_id, transition_time=1)
 
 
 def get_group_id(api: dict, room_name: str) -> int:
@@ -62,9 +65,9 @@ def get_group_id(api: dict, room_name: str) -> int:
             return int(group_id)
 
 
-def get_scene_id(api: dict, scene_name: str) -> int:
+def get_scene_id(api: dict, group_id: int, scene_name: str) -> int:
     for scene_id, scene_dict in api["scenes"].items():
-        if scene_name == scene_dict["name"]:
+        if group_id == int(scene_dict["group"]) and scene_name == scene_dict["name"]:
             return scene_id
 
 
