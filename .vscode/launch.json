@@ -8,9 +8,9 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "hue.py",
             "console": "integratedTerminal",
-            "args": ["-l"]
+            "args": ["-r", "Office", "-s", "Dimmed"]
         }
     ]
 }
