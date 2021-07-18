@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from phue import Bridge
+from phue import Bridge, Group
 from typing import Tuple
 import os
 import argparse
@@ -94,7 +94,8 @@ def activate_scene(bridge: Bridge, api: dict, room: str, scene: str) -> None:
 
     if scene == "Off":
         # This isn't actually a scene, so it is needs to be handled differently
-        bridge.set_group(group_id, "on", False)
+        group = Group(bridge, group_id)
+        group.on = False
         return
 
     scene_id = get_scene_id(api=api, group_id=group_id, scene_name=scene)
