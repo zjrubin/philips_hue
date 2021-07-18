@@ -102,18 +102,30 @@ def activate_scene(bridge: Bridge, api: dict, room: str, scene: str) -> None:
     bridge.activate_scene(group_id=group_id, scene_id=scene_id, transition_time=1)
 
 
-def get_group_id(api: dict, room_name: str) -> int:
+def get_group_id(api: dict, room_name: str) -> str:
     for group_id, group_dict in api["groups"].items():
         if room_name == group_dict["name"]:
-            return int(group_id)
+            return group_id
     raise ValueError(f"Could not find group id for room [{room_name}].")
 
 
-def get_scene_id(api: dict, group_id: int, scene_name: str) -> int:
-    for scene_id, scene_dict in api["scenes"].items():
-        if group_id == int(scene_dict["group"]) and scene_name == scene_dict["name"]:
+def get_scene_id(api: dict, group_id: str, scene_name: str) -> str:
+    group_scenes = [
+        (scene_id, scend_dict["name"])
+        for scene_id, scend_dict in api["scenes"].items()
+        if scend_dict["group"] == group_id
+    ]
+    for scene_id, _scene_name in group_scenes:
+        if scene_name == _scene_name:
             return scene_id
-    raise ValueError(f"Could not find scene [{scene_name}] for group [{group_id}].")
+
+    # Could not find the scene
+    sorted_scenes: list = sorted((scene_name for _, scene_name in group_scenes))
+    raise ValueError(
+        f"Could not find scene [{scene_name}] for group [{group_id}]."
+        f" Available scenes are [{', '.join(sorted_scenes)}]."
+        " Do you need to add this scene to this room?"
+    )
 
 
 def output_api() -> None:
